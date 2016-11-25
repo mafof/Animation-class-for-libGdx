@@ -3,79 +3,65 @@ package com.mygdx.game.util;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+import java.lang.reflect.Array;
 
 
 public class AnimationsPlayer {
 
 
      /* Временные переменные  */
-     boolean bool;
-     boolean templates = false;
      public static String testMessage = "Test Message";
     /*---------------------------------*/
 
-
+    TextureRegion[] completeTextureRegion;
+    TextureRegion[] completeAnimation;
     public static Animation animation;
     float time;
     boolean isTime = true; // Нужна для остановки обновления кадров, false = не обновлять, true = обновлять
-    public static Animation.PlayMode state = Animation.PlayMode.NORMAL;
-    TextureRegion[] region;
+    public static Animation.PlayMode state = Animation.PlayMode.LOOP;
 
 
-    public AnimationsPlayer(Texture texture, int MROW, boolean isTime) {
+    public AnimationsPlayer(Texture texture, int width, int height, int col, int row) {
         this.isTime = isTime;
-        TextureRegion[][] frames = TextureRegion.split(texture, 100, 100);
-        region = new TextureRegion[MROW];
 
-        for(int i = 0; i < MROW; i++) {
-            region[i] = frames[0][i];
-            System.out.println(region[i].getRegionX());
-        }
-        animation = new Animation(0.5f, region);
-    }
+        TextureRegion[][] templateRegion = TextureRegion.split(texture, width, height);
+        completeTextureRegion = new TextureRegion[row * col];
+        int index = 0;
 
-    public AnimationsPlayer(Texture texture, int MROW, boolean isTime, float speed) { // Консруктор со скоростью
-        this.isTime = isTime;
-        TextureRegion[][] frames = TextureRegion.split(texture, 100, 100);
-        region = new TextureRegion[MROW];
-
-        for(int i = 0; i < MROW; i++) {
-            region[i] = frames[0][i];
-            System.out.println(region[i].getRegionX());
-        }
-        animation = new Animation(speed, region);
-    }
-
-    public void selectStateHard(boolean templatebool) { // Определяем состояние(основа управления анимацией персонажа)(Сложный способ, ниже будет способ проще который работает с InputEvent())
-        if(!templatebool && !templates) {
-            System.out.println("ifJobs");
-            state = Animation.PlayMode.NORMAL;
-            bool = true;
-            templates = true;
-            testMessage = "Animation OFF(NORMAL)";
-        } else if(templatebool && !templates) {
-            System.out.println("ifJobs2");
-            state = Animation.PlayMode.LOOP;
-            bool = false;
-            templates = true;
-            testMessage = "Animation ON(LOOP)";
-        }
-        if(Gdx.input.justTouched()) {
-            System.out.println("justTouched");
-            System.out.println(bool);
-            if(!bool) {
-                state = Animation.PlayMode.NORMAL;
-                bool = true;
-                testMessage = "Animation OFF(NORMAL)";
-                isTime = false;
-            } else {
-                state = Animation.PlayMode.LOOP;
-                bool = false;
-                testMessage = "Animation ON(LOOP)";
-                isTime = true;
+        for(int i = 0; i < row; i++) {
+            for(int j = 0; j < col; j++, index++) {
+                completeTextureRegion[index] = templateRegion[i][j];
             }
         }
+
+        animation = new Animation(0.5f,templateRegion[0][0]);
+        System.out.println(animation.getKeyFrames());
+    }
+
+    public void selectAnimation(int row, int col) {
+        completeAnimation = new TextureRegion[col];
+
+        if(row != 1) {
+            int numberFor = row * col;
+            int numberI = numberFor - col;
+            int index = 0;
+
+            for (int i = numberI; i < numberFor; i++, index++) {
+                completeAnimation[index] = completeTextureRegion[i];
+            }
+        } else if( row == 1 ) {
+            int tmp = 0;
+            int index = 0;
+
+            for (int i = tmp; i < col; i++, index++) {
+                System.out.println("[3na4] i " + i);
+                completeAnimation[index] = completeTextureRegion[i];
+            }
+        }
+        animation = new Animation(0.5f, completeAnimation);
     }
 
     public void selectState(boolean bool) { // if true to State = LOOP, else false to State = NORMAL
@@ -92,7 +78,7 @@ public class AnimationsPlayer {
 
 
     public TextureRegion playAnimation() { // Запуск анимации(Не реагирует на параметр изменения состояния движения графики)
-        if(isTime) { return animation.getKeyFrame(time += Gdx.graphics.getDeltaTime()); }
+        if(isTime) { return animation.getKeyFrame(time += Gdx.graphics.getDeltaTime(), true); }
         else { return animation.getKeyFrame(time = 0); }
     }
 }
