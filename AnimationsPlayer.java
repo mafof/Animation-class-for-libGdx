@@ -17,7 +17,7 @@ public class AnimationsPlayer {
     public static Animation animation;
     float time;
     boolean isTime = true; // Нужна для остановки обновления кадров, false = не обновлять, true = обновлять
-    public static Animation.PlayMode state = Animation.PlayMode.LOOP;
+    public static Animation.PlayMode state = Animation.PlayMode.LOOP; // Где теперь это используется?
     float speed = 0.5f;
 
 
@@ -54,8 +54,7 @@ public class AnimationsPlayer {
                 completeAnimation[index] = completeTextureRegion[i];
             }
         }
-        //animation = new Animation(speed, completeAnimation);
-        deleteFrame();
+        deleteFrame(); // Удаляет первый кадр(стоп кадр)
     }
 
     public void selectAnimation(int row, int col, float speed) {
@@ -63,36 +62,25 @@ public class AnimationsPlayer {
         selectAnimation(row,col);
     }
 
-    private void deleteFrame() { // Нужен для того что бы не отображался определенный кадр в анимации
-        TextureRegion[] seeCompleteTextureRegion = new TextureRegion[completeAnimation.length];
+    private void deleteFrame() { // Нужен для того что бы не отображался 1 кадр в анимации
+        TextureRegion[] completeTextureRegion = new TextureRegion[completeAnimation.length];
+
         int index = 0;
-
         for(int i = 1; i < completeAnimation.length; i++, index++) { // Убираем 1 кадр
-            seeCompleteTextureRegion[index] = completeAnimation[i];
-            System.out.println(index);
-            System.out.println(seeCompleteTextureRegion[index].getRegionX());
+            completeTextureRegion[index] = completeAnimation[i];
         }
-
-        for(int i = 1; i < seeCompleteTextureRegion.length; i++) { // Проверка кадров
-            if(seeCompleteTextureRegion[i] != null) {
-                System.out.println("[de]" + seeCompleteTextureRegion[i].getRegionX());
-            } else {
-                System.out.println("[Warning] i = " + i + " null");
-            }
-        }
-
-        animation = new Animation(speed, completeDeleteFrame(seeCompleteTextureRegion));
+        animation = new Animation(speed, completeDeleteFrame(completeTextureRegion)); // Вызываем completeDeleteFrame для корректного отображения анимации
     }
 
-    private TextureRegion[] completeDeleteFrame(TextureRegion[] region) {
-        TextureRegion[] seeCompleteTextureRegions = new TextureRegion[region.length-1];
+    private TextureRegion[] completeDeleteFrame(TextureRegion[] region) { // Нужен для корректного отображения кадров и удаление кадров с null
+        TextureRegion[] completeTextureRegion = new TextureRegion[region.length-1];
         int index = 0;
         for(int i = 0; i < region.length-1; i++, index++) {
             if(region[i] != null) {
-                seeCompleteTextureRegions[index] = region[i];
+                completeTextureRegion[index] = region[i];
             }
         }
-        return seeCompleteTextureRegions;
+        return completeTextureRegion;
     }
 
     public void selectState(boolean bool) {
